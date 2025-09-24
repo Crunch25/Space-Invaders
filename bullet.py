@@ -1,4 +1,3 @@
-# bullet.py
 import pygame
 
 class Bullet:
@@ -8,7 +7,6 @@ class Bullet:
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = -7
 
-        # если активен навык Fast Bullets
         if fast:
             self.speed = -12
 

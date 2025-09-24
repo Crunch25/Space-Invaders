@@ -13,25 +13,23 @@ def blur_surface(surface, scale=0.7):
     small = pygame.transform.smoothscale(surface, (int(w * scale), int(h * scale)))
     return pygame.transform.smoothscale(small, (w, h))
 
-# Константы
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-screen = pygame.display.set_mode((WIDTH, HEIGHT))  # сначала создаём окно
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 pygame.display.set_caption("Space Invaders")
 
 clock = pygame.time.Clock()
 
-# --- Магазин навыков ---
 skills = {
     "Double Shot": {"price": 25, "bought": False},
     "Triple Shot": {"price": 50, "bought": False},
     "Fast Movement": {"price": 30, "bought": False},
     "Shield": {"price": 35, "bought": False},
-    "Extra Life": {"price": 25, "bought": False},  # можно покупать сколько угодно
-    "Fire Rate": {"price": 75, "level": 0, "max": 3},  # 🔥 скорость стрельбы
+    "Extra Life": {"price": 25, "bought": False},
+    "Fire Rate": {"price": 75, "level": 0, "max": 3},
 }
 
 def spawn_enemies(count, level):
@@ -57,7 +55,7 @@ def main():
     waves_per_level = 3
     wave_size = 3
     wave_timer = 0
-    wave_delay = 200  # задержка между волнами в кадрах (~3 секунды)
+    wave_delay = 200
 
     score = 0
     coins = 0
@@ -66,16 +64,14 @@ def main():
     shield_active = False
     shop_open = False
 
-    # --- Автоматическая стрельба ---
     shoot_timer = 0
-    shoot_delay = 30  # базовое значение, уменьшается покупкой Fire Rate
+    shoot_delay = 30 
 
     running = True
     while running:
         clock.tick(FPS)
         screen.fill(BLACK)
 
-        # --- События ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 save_highscore(highscore)
@@ -102,14 +98,13 @@ def main():
                     elif event.key == pygame.K_6 and skills["Fire Rate"]["level"] < skills["Fire Rate"]["max"] and coins >= skills["Fire Rate"]["price"]:
                         skills["Fire Rate"]["level"] += 1
                         coins -= skills["Fire Rate"]["price"]
-                        shoot_delay = max(5, shoot_delay - 5)  # уменьшаем задержку
+                        shoot_delay = max(5, shoot_delay - 5)
                     elif event.key == pygame.K_s:
                         shop_open = False
                 else:
                     if event.key == pygame.K_s:
                         shop_open = True
 
-        # --- Магазин ---
         if shop_open:
             font = pygame.font.SysFont(None, 36)
             shop_text = font.render("SHOP - Press 1-6 to Buy, S to Exit", True, (255, 255, 0))
@@ -132,30 +127,24 @@ def main():
             pygame.display.flip()
             continue
 
-        # --- Управление ---
         move_speed = 5
         if skills["Fast Movement"]["bought"]:
             move_speed = 8
 
-        # управление клавишами
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.move(-move_speed)
         if keys[pygame.K_RIGHT]:
             player.move(move_speed)
 
-        # управление мышью (ось X)
         mouse_x, _ = pygame.mouse.get_pos()
         player.rect.centerx = mouse_x
 
-        # ограничение, чтобы не выходил за экран
         if player.rect.left < 0:
             player.rect.left = 0
         if player.rect.right > WIDTH:
             player.rect.right = WIDTH
 
-
-        # --- Автоматическая стрельба ---
         shoot_timer += 1
         if shoot_timer >= shoot_delay:
             shoot_timer = 0
@@ -169,13 +158,11 @@ def main():
             else:
                 bullets.append(Bullet(player.rect.centerx, player.rect.top))
 
-        # --- Обновление пуль ---
         for bullet in bullets[:]:
             bullet.update()
             if bullet.rect.bottom < 0:
                 bullets.remove(bullet)
 
-        # --- Обновление врагов ---
         for enemy in enemies[:]:
             enemy.update()
             if enemy.rect.top > HEIGHT:
@@ -204,7 +191,6 @@ def main():
                         highscore = score
                     break
 
-        # --- Спавн волн уровня ---
         wave_timer += 1
         if wave_timer >= wave_delay:
             wave_timer = 0
@@ -213,12 +199,10 @@ def main():
                 enemies.extend(spawn_enemies(wave_size, level))
                 wave_size += 1
             else:
-                # Новый уровень
                 level += 1
                 current_wave = 0
                 wave_size = 3 + level
 
-        # --- Рендер ---
         player.draw(screen)
         for bullet in bullets:
             bullet.draw(screen)
@@ -237,7 +221,6 @@ def main():
 
         pygame.display.flip()
 
-    # --- Конец игры ---
     game_over_font = pygame.font.SysFont(None, 72)
     game_over_text = game_over_font.render("GAME OVER", True, (255, 50, 50))
     screen.fill(BLACK)
